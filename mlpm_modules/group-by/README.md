@@ -55,8 +55,8 @@ In contrast, the **group-by** library drastically simplifies these types of oper
 
 ```xquery
 cts:group-by((
-  cts:column("position", cts:element-reference(xs:QName("position"))),
-  cts:column("company", cts:element-reference(xs:QName("company"))),
+  cts:column(cts:element-reference(xs:QName("position"))),
+  cts:column(cts:element-reference(xs:QName("company"))),
   cts:compute("avg", cts:element-reference(xs:QName("salary"))),
   cts:compute("median", cts:element-reference(xs:QName("bonus")))
 ))
@@ -179,42 +179,60 @@ cts:cube(
 
 ### query specification
 
-Query specifications are created from three function types: `cts:row`, `cts:column`, and `cts:compute`. Each type constructs a named `cts:reference` to a lexicon.
+Query specifications are created from three function types: `cts:column`, `cts:row`, and `cts:compute`. Each type constructs a named `cts:reference` to a lexicon.
 
 #### <a name="references"/> lexicon reference types
 
 - [cts:collection-reference](http://docs.marklogic.com/cts:collection-reference)
 - [cts:element-attribute-reference](http://docs.marklogic.com/cts:element-attribute-reference)
 - [cts:element-reference](http://docs.marklogic.com/cts:element-reference)
+- [cts:json-property-reference](http://docs.marklogic.com/cts:json-property-reference)
 - [cts:field-reference](http://docs.marklogic.com/cts:field-reference)
 - [cts:geospatial-attribute-pair-reference](http://docs.marklogic.com/cts:geospatial-attribute-pair-reference)
 - [cts:geospatial-element-child-reference](http://docs.marklogic.com/cts:geospatial-element-child-reference)
+- [cts:geospatial-json-property-child-reference](http://docs.marklogic.com/cts:geospatial-json-property-child-reference)
 - [cts:geospatial-element-pair-reference](http://docs.marklogic.com/cts:geospatial-element-pair-reference)
+- [cts:geospatial-json-property-pair-reference](http://docs.marklogic.com/cts:geospatial-json-property-pair-reference)
 - [cts:geospatial-element-reference](http://docs.marklogic.com/cts:geospatial-element-reference)
+- [cts:geospatial-json-property-reference](http://docs.marklogic.com/cts:geospatial-json-property-reference)
 - [cts:geospatial-path-reference](http://docs.marklogic.com/cts:geospatial-path-reference)
 - [cts:path-reference](http://docs.marklogic.com/cts:path-reference)
 - [cts:uri-reference](http://docs.marklogic.com/cts:uri-reference)
 
-
-#### <a name="func_row"/> cts:row
+#### <a name="func_column"/> cts:column\#1
 ```xquery
-cts:row(
-  $alias as xs:string,
-  $reference as cts:reference,
-) as (function() as element(cts:row))
+cts:column(
+  $reference as cts:reference
+) as (function() as element(cts:column))
 ```
 
-#### <a name="func_column"/> cts:column
+#### <a name="func_column_2"/>
 ```xquery
 cts:column(
   $alias as xs:string,
-  $reference as cts:reference,
+  $reference as cts:reference
 ) as (function() as element(cts:column))
+```
+
+#### <a name="func_row_1"/> cts:row\#1
+```xquery
+cts:row(
+  $reference as cts:reference
+) as (function() as element(cts:row))
+```
+
+#### <a name="func_row_2"/> cts:row\#2
+```xquery
+cts:row(
+  $alias as xs:string,
+  $reference as cts:reference
+) as (function() as element(cts:row))
 ```
 
 ###### notes
 
 - the names "rows" and "columns" are understood in the spirit of spreadsheet pivot tables
+- for `cts:column#1` and `cts:row#1`, a default alias is created from the properties of the `cts:reference` (such as the element name, or path expression)
 - they are treated identically by `cts:group-by`; the distinction between them determines the nesting of result-sets in `cts:cross-product` and `cts:cube`
 
 #### <a name="func_compute"/> cts:compute
@@ -245,7 +263,7 @@ cts:compute(
 
 ###### `$alias`
 
-When `$alias` is not provided, the computation result is aliased to the name of the aggregate function. This can lead to property/key name-collisions when returning results with the option `"format=map"`.
+for `cts:compute#2`, a default alias is constructed: the function name is concatenated with the alias created from the `cts:reference` properties; ex: `avg-<element-name>`
 
 ###### `$function`
 
@@ -307,14 +325,25 @@ grpj:query($query)
 
 * $query as `map:map` or `json:object`
 
+- - -
+
+##### REST extension: `http://marklogic.com/rest-api/resource/group-by`
+
+MarkLogic REST API extension for JSON `cts:group-by` queries over any database
+
+##### POST `/v1/resources/group-by`
+
+evaluates a JSON-serialized `cts:group-by` query
+
+###### params
+
+* `rs:database` as `xs:string?`: optionally specify the name of a database to query
+
 ### License Information
 
 ###### group-by
 - Copyright (c) 2014 Joseph Bryan. All Rights Reserved.
 - Copyright (c) 2014 Gary Vidal. All Rights Reserved.
-
-###### group-by-json
-- Copyright (c) 2014 Joseph Bryan. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

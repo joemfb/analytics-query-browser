@@ -4,6 +4,7 @@
   "description": "interactive browser for group-by aggregate lexicon queries",
   "private": true,
   "dependencies": {
-    "group-by-rest": "1.0.0"
+    "group-by": "1.1.*",
+    "ml-index-discovery": "1.1.*"
   }
 }
