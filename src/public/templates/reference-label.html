@@ -1,0 +1,13 @@
+<span>
+  <span ng-if="reference.alias">{{ reference.alias }}</span>
+  <span ng-if="ref">
+    <span ng-if="!ref['parent-localname']">{{ ref.localname || ref['path-expression'] || ref['field-name']}}</span>
+    <span ng-if="ref['parent-localname']">
+      <span ng-if="ref.localname">{{ ref['parent-localname'] }}/@{{ ref.localname }}</span>
+      <span ng-if="!ref.localname">
+        <span ng-if="ref['ref-type'] === 'geospatial-attribute-pair-reference'">{{ ref['parent-localname'] }}/(lat=@{{ ref['latitude-localname'] }},lon=@{{ ref['longitude-localname'] }})</span>
+        <span ng-if="ref['ref-type'] !== 'geospatial-attribute-pair-reference'">{{ ref['parent-localname'] }}/(lat={{ ref['latitude-localname'] }},lon={{ ref['longitude-localname'] }})</span>
+      </span>
+    </span>
+  </span>
+</span>

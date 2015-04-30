@@ -5,3 +5,20 @@ body {
 .panel-group .panel {
   overflow: visible;
 }
+
+.query-browser .columns > div,
+.query-browser .rows > div {
+  position: relative;
+}
+.query-browser a {
+  cursor: pointer;
+}
+.query-browser .lexicon a {
+  color: rgb(51, 51, 51);
+}
+.query-browser .computations > div {
+  position: relative;
+}
+.query-browser .strikethru {
+  text-decoration: line-through;
+}

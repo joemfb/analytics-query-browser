@@ -1,76 +1,145 @@
-<div xmlns="http://www.w3.org/1999/xhtml">
-  <div class="col-md-4">
-    <accordion close-others="oneAtATime">
-      <accordion-group heading="{{name}}" ng-repeat="(name, elements) in config.docs" is-open="{{$index === 0 }}">
-        <ul>
-          <li class="dropdown" ng-repeat="element in elements">
-            <span>{{element.localname || element['path-expression']}} - <strong>{{element['scalar-type']}}</strong></span>
-            <a class="dropdown-toggle">
-              <i class="fa fa-arrow-circle-o-down"></i>
-            </a>
-            <ul class="dropdown-menu">
-              <li><a ng-click="addRow(element)">Add Row</a></li>
-              <li><a ng-click="addColumn(element)">Add Column</a></li>
-              <li><a ng-click="addCompute(element)">Add Computation</a></li>
-            </ul>
-          </li>
-        </ul>
-      </accordion-group>
-    </accordion>
+<div class="query-browser">
+  <div class="row">
+    <div class="col-md-12 options">
+      <h3>options</h3>
+      <label>database:</label>
+      <select ng-options="database for database in model.config.databases"
+              ng-model="model.config['current-database']"
+              ng-change="getConfig()"></select>
+      <span ng-show="model.loadingConfig">
+        &nbsp;<i class="fa fa-spinner fa-spin"></i>
+      </span>
+    </div>
   </div>
-  <div class="col-md-8">
-    <div class="row rows connected-members">
-      <h2>Rows</h2>
-      <div>
-        <div ng-repeat="member in queryConfig.rows">
-          <span>{{member.localname || member['path-expression']}}</span>&nbsp;
-          <a ng-click="removeRow(member)">
-            <i class="fa fa-times"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-    <div class="row columns connected-members">
-      <h2>Columns</h2>
-      <div>
-        <div ng-repeat="member in queryConfig.columns">
-          <span>{{member.localname || member['path-expression']}}</span>&nbsp;
-          <a ng-click="removeColumn(member)">
-            <i class="fa fa-times"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-    <div class="row computations">
-      <h2>Computations</h2>
-      <div ng-repeat="compute in queryConfig.computes">
-          <span>{{compute.ref.localname || compute.ref['path-expression']}} <strong>{{compute.fn}}</strong></span>&nbsp;
-          <a class="dropdown-toggle">
-            <i class="fa fa-arrow-circle-o-down"></i>
-          </a>&nbsp;
-          <ul class="dropdown-menu">
-            <li ng-repeat="fn in config.aggregates">
-              <a ng-click="selectCompute(compute, fn)">{{fn}}</a>
+  <div class="row">
+    <div class="col-md-4">
+      <h3>documents</h3>
+      <div ng-if="model.config &amp;&amp; !model.docsExist" class="alert alert-success">no documents with range indices in {{ model.config['current-database'] }}</div>
+      <accordion close-others="true">
+        <accordion-group ng-repeat="(name, elements) in model.config.docs" is-open="{{ $index === 0 }}">
+          <accordion-heading>
+            <span ng-if="name.indexOf('}') === -1">{{ name }}</span>
+            <span ng-if="name.indexOf('}') > -1" title="{{ name }}">
+              {{ name.split('}')[1] }}
+              <br/>
+              <small>{{ name }}</small>
+            </span>
+          </accordion-heading>
+          <ul>
+            <li class="dropdown lexicon" ng-repeat="element in elements">
+              <a class="dropdown-toggle">
+                <span>
+                  <reference-label reference="element"></reference-label>
+                  <em>({{ element['scalar-type'] }})</em>
+                </span>
+              </a>
+              <ul class="dropdown-menu">
+                <!--<li><a ng-click="addRow(element)">Add Row</a></li>-->
+                <li><a ng-click="addColumn(element)">Add Column</a></li>
+                <li><a ng-click="!(model.queryConfig.rows.length || model.queryConfig.columns.length) || addCompute(element)"
+                       ng-class="{true: 'strikethru'}[ !(model.queryConfig.rows.length || model.queryConfig.columns.length) ]">Add Computation</a></li>
+              </ul>
             </li>
           </ul>
+        </accordion-group>
+      </accordion>
+    </div>
+    <div class="col-md-8">
+      <h3>query</h3>
+      <div ng-if="model.docsExist &amp;&amp; !(model.queryConfig.rows.length || model.queryConfig.columns.length)" class="alert alert-success">select from the available lexicons (within a common document) to create a query</div>
+      <!--
+      <div ng-if="model.queryConfig.rows.length" class="rows">
+        <h4>rows:</h4>
+        <div>
+          <div ng-repeat="member in model.queryConfig.rows">
+            <reference-label reference="member"></reference-label>
+            <a ng-click="removeRow(member)">
+              <i class="fa fa-times"></i>
+            </a>
+          </div>
+        </div>
+        <hr/>
+      </div>
+      -->
+      <div ng-if="model.queryConfig.columns.length" class="columns">
+        <h4>columns:</h4>
+        <div>
+          <div ng-repeat="member in model.queryConfig.columns">
+            <reference-label reference="member"></reference-label>
+            <div class="btn-group dropdown">
+              <a class="dropdown-toggle">
+                <i class="fa fa-cog"></i>
+              </a>
+              <ul class="dropdown-menu">
+                <li>
+                  <div style="padding: 3px 20px;">
+                    <label ng-class="{true: 'strikethru'}[ $index === 0 ]">nullable:</label>
+                    <input ng-if="$index &gt; 0" type="checkbox" ng-model="member.nullable"></a>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <a ng-click="removeColumn(member)">
+              <i class="fa fa-times"></i>
+            </a>
+          </div>
+        </div>
+        <hr/>
+      </div>
+      <div ng-if="model.queryConfig.rows.length || model.queryConfig.columns.length" class="computations">
+        <h4>computations:</h4>
+        <div ng-repeat="compute in model.queryConfig.computes">
+          <strong ng-if="compute.availableFns.length === 1">{{ compute.fn }}:</strong>
+          <select ng-if="compute.availableFns.length > 1"
+                  ng-options="fn for fn in compute.availableFns | orderBy:'toString()'"
+                  ng-model="compute.fn">
+            <option value="">-- choose function --</option>
+          </select>
+          <reference-label reference="compute"></reference-label>
           <a ng-click="removeCompute(compute)">
             <i class="fa fa-times"></i>
           </a>
+        </div>
+        <br ng-if="model.queryConfig.computes.length">
+        <div>
+          <label>frequency:</label>
+          <input type="checkbox" ng-model="model.includeFrequency">
+        </div>
+        <hr/>
       </div>
-    </div>
-    <div class="row">
-      <button class="btn" ng-click="query()">Submit Query</button>
-    </div>
-    <div class="row">
-      <table class="table table-striped">
+      <div class="controls">
+        <span ng-show="model.queryConfig.rows.length || model.queryConfig.columns.length">
+          <button ng-show="model.loadingResults" class="btn btn-default" ng-click="cancelQuery()">
+            Cancel Query
+            <i class="fa fa-times"></i>
+          </button>
+          <button ng-show="!model.loadingResults" class="btn btn-default" ng-click="getResults()">Submit Query</button>
+        </span>
+        <span ng-show="model.loadingResults">
+          &nbsp;<i class="fa fa-spinner fa-spin"></i>&nbsp;
+        </span>
+        <button class="btn btn-default" ng-show="model.results" ng-click="clearResults()" title="Clear Results">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <div ng-if="model.error" class="alert alert-danger">{{ model.error }}</div>
+      <!-- TODO: ml-search duration -->
+      <p ng-if="model.results" class="metrics">
+        <br>
+        <em>{{ model.results.results.length }} results in {{ model.results.metrics['total-time'] }}</em>
+      </p>
+      <table class="table table-striped results">
         <thead>
           <tr>
-            <th ng-repeat="header in results.headers">{{header}}</th>
+            <th ng-repeat="header in model.results.headers">{{ header }}</th>
           </tr>
         </thead>
         <tbody>
-          <tr ng-repeat="result in results.results">
-            <td ng-repeat="val in result">{{val}}</td>
+          <tr ng-repeat="result in model.results.results track by $index">
+            <td ng-repeat="val in result track by $index">
+              <em ng-if="val === ''">empty</em>
+              <span ng-if="val !== ''">{{ val }}</span>
+            </td>
           </tr>
         </tbody>
       </table>
