@@ -1,0 +1,79 @@
+<div xmlns="http://www.w3.org/1999/xhtml">
+  <div class="col-md-4">
+    <accordion close-others="oneAtATime">
+      <accordion-group heading="{{name}}" ng-repeat="(name, elements) in config.docs" is-open="{{$index === 0 }}">
+        <ul>
+          <li class="dropdown" ng-repeat="element in elements">
+            <span>{{element.localname || element['path-expression']}} - <strong>{{element['scalar-type']}}</strong></span>
+            <a class="dropdown-toggle">
+              <i class="fa fa-arrow-circle-o-down"></i>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a ng-click="addRow(element)">Add Row</a></li>
+              <li><a ng-click="addColumn(element)">Add Column</a></li>
+              <li><a ng-click="addCompute(element)">Add Computation</a></li>
+            </ul>
+          </li>
+        </ul>
+      </accordion-group>
+    </accordion>
+  </div>
+  <div class="col-md-8">
+    <div class="row rows connected-members">
+      <h2>Rows</h2>
+      <div>
+        <div ng-repeat="member in queryConfig.rows">
+          <span>{{member.localname || member['path-expression']}}</span>&nbsp;
+          <a ng-click="removeRow(member)">
+            <i class="fa fa-times"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="row columns connected-members">
+      <h2>Columns</h2>
+      <div>
+        <div ng-repeat="member in queryConfig.columns">
+          <span>{{member.localname || member['path-expression']}}</span>&nbsp;
+          <a ng-click="removeColumn(member)">
+            <i class="fa fa-times"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="row computations">
+      <h2>Computations</h2>
+      <div ng-repeat="compute in queryConfig.computes">
+          <span>{{compute.ref.localname || compute.ref['path-expression']}} <strong>{{compute.fn}}</strong></span>&nbsp;
+          <a class="dropdown-toggle">
+            <i class="fa fa-arrow-circle-o-down"></i>
+          </a>&nbsp;
+          <ul class="dropdown-menu">
+            <li ng-repeat="fn in config.aggregates">
+              <a ng-click="selectCompute(compute, fn)">{{fn}}</a>
+            </li>
+          </ul>
+          <a ng-click="removeCompute(compute)">
+            <i class="fa fa-times"></i>
+          </a>
+      </div>
+    </div>
+    <div class="row">
+      <button class="btn" ng-click="query()">Submit Query</button>
+    </div>
+    <div class="row">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th ng-repeat="header in results.headers">{{header}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="result in results.results">
+            <td ng-repeat="val in result">{{val}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

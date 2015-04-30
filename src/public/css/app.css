@@ -1,0 +1,7 @@
+body {
+  padding-top: 50px;
+}
+
+.panel-group .panel {
+  overflow: visible;
+}

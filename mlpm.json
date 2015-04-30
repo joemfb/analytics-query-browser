@@ -1,0 +1,9 @@
+{
+  "name": "query-browser",
+  "version": "1.0.0",
+  "description": "interactive browser for group-by aggregate lexicon queries",
+  "private": true,
+  "dependencies": {
+    "group-by-rest": "1.0.0"
+  }
+}

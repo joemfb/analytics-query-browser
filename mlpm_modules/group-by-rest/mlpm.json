@@ -1,0 +1,11 @@
+{
+  "name": "group-by-rest",
+  "version": "1.0.0",
+  "description": "MarkLogic REST API extension for zero-knowledge JSON cts:group-by queries",
+  "repository": "https://github.com/joemfb/group-by-rest.git",
+  "dependencies": {
+    "cts-extensions": "1.0.1",
+    "group-by": "1.0.0",
+    "ml-index-discovery": "1.0.2"
+  }
+}
