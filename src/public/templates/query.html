@@ -73,8 +73,12 @@
               <ul class="dropdown-menu">
                 <li>
                   <div style="padding: 3px 20px;">
-                    <label ng-class="{true: 'strikethru'}[ $index === 0 ]">nullable:</label>
-                    <input ng-if="$index &gt; 0" type="checkbox" ng-model="member.nullable"></a>
+                    <label ng-if="$index === 0" class="strikethru">nullable</label>
+                    <span ng-if="$index > 0">
+                      <label>nullable:</label>
+                      <input type="checkbox" ng-model="member.nullable"
+                             ng-click="$event.stopPropagation(); member.nullable = !member.nullable"></a>
+                    </span>
                   </div>
                 </li>
               </ul>
