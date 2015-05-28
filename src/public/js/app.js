@@ -41,14 +41,33 @@
   function GroupByQueryController($scope, $http, $q, aggregates) {
     var model = {
           queryConfig: null,
-          error: null,
+          queryError: null,
           config: null,
+          configError: null,
           results: null,
           includeFrequency: false,
           loadingConfig: false,
           loadingResults: false
         },
         deferredAbort = null;
+
+    function updateConfig(response) {
+      model.config = response.data;
+      model.configError = null;
+      model.docsExist = !angular.equals(model.config.docs, {});
+      model.loadingConfig = false;
+    }
+
+    function handleConfigError(response) {
+      model.loadingConfig = false;
+
+      if (response.status !== 0) {
+        model.configError = {
+          title: response.statusText,
+          description: response.data
+        };
+      }
+    }
 
     function getConfig() {
       var params = {};
@@ -61,7 +80,7 @@
 
       clearResults();
       model.includeFrequency = false;
-      model.config = null;
+      // model.config = null;
       model.queryConfig = {
         'result-type': 'group-by',
         rows: [],
@@ -70,16 +89,14 @@
         options: ['headers=true']
       };
 
-      $http.get('/v1/resources/index-discovery', { params: params }).then(function(response) {
-        model.config = response.data;
-        model.docsExist = !angular.equals(model.config.docs, {});
-        model.loadingConfig = false;
-      });
+      $http.get('/v1/resources/index-discovery', {
+        params: params
+      }).then(updateConfig, handleConfigError);
     }
 
     function updateResults(response) {
       model.results = response.data;
-      model.error = null;
+      model.queryError = null;
       model.loadingResults = false;
     }
 
@@ -87,7 +104,7 @@
       model.loadingResults = false;
 
       if (response.status !== 0) {
-        model.error = {
+        model.queryError = {
           title: response.statusText,
           description: response.data
         };

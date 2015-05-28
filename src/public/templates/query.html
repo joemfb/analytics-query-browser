@@ -47,6 +47,7 @@
     <div class="col-md-8">
       <h3>query</h3>
       <div ng-if="model.docsExist &amp;&amp; !(model.queryConfig.rows.length || model.queryConfig.columns.length)" class="alert alert-success">select from the available lexicons (within a common document) to create a query</div>
+      <div ng-if="model.configError" class="alert alert-danger">{{ model.configError }}</div>
       <!--
       <div ng-if="model.queryConfig.rows.length" class="rows">
         <h4>rows:</h4>
@@ -126,7 +127,7 @@
           <i class="fa fa-times"></i>
         </button>
       </div>
-      <div ng-if="model.error" class="alert alert-danger">{{ model.error }}</div>
+      <div ng-if="model.queryError" class="alert alert-danger">{{ model.queryError }}</div>
       <!-- TODO: ml-search duration -->
       <p ng-if="model.results" class="metrics">
         <br>
