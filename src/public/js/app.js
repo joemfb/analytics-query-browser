@@ -47,7 +47,8 @@
           results: null,
           includeFrequency: false,
           loadingConfig: false,
-          loadingResults: false
+          loadingResults: false,
+          groupingStrategy: 'root'
         },
         deferredAbort = null;
 
@@ -70,7 +71,9 @@
     }
 
     function getConfig() {
-      var params = {};
+      var params = {
+        'rs:strategy': model.groupingStrategy
+      };
 
       model.loadingConfig = true;
 

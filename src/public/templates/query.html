@@ -6,6 +6,13 @@
       <select ng-options="database for database in model.config.databases"
               ng-model="model.config['current-database']"
               ng-change="getConfig()"></select>
+      <br />
+      <label>group indexes by:</label>
+      <select ng-model="model.groupingStrategy"
+              ng-change="getConfig()">
+        <option>root</option>
+        <option>collection</option>
+      </select>
       <span ng-show="model.loadingConfig">
         &nbsp;<i class="fa fa-spinner fa-spin"></i>
       </span>
